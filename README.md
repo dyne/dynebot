@@ -74,6 +74,8 @@ You are **encouraged to do this** and edit the config file with your real data.
 | **REDIS_HOST** | server host of redis | `string` |
 | **REDIS_PORT** | server port of redis | `int` |
 | **REDIS_DB** | redis database | `int` |
+| **HOUR** | hour time to ask for timesheets | `int` |
+| **MINUTE** | minute time to ask for timesheets | `int` |
 
 
 
