@@ -46,7 +46,7 @@ def ask_for_hours(bot, job):
 
 
 def timesheet(bot, update, job_queue):
-    job_queue.run_daily(ask_for_hours, datetime.time(hour=19, minute=32), days=(0, 1, 2, 3, 4, 5), context=update)
+    job_queue.run_daily(ask_for_hours, datetime.time(hour=config.getint("HOUR"), minute=config.getint("MINUTE")), days=(0, 1, 2, 3, 4, 5), context=update)
 
 
 def help_handler(update, context):

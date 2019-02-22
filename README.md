@@ -34,15 +34,21 @@ This should install all the needed dependencies.
 
 A running redis server is also needed. Configuration of the redis url is described below.
 
-***
-## :video_game: Usage
-
-To start using the bot just run it and leave it running
+To start using the bot just run it and leave it running on the server
 
 ```bash
 python main.py
 ```
 
+***
+## :video_game: Usage
+
+### /help
+will just print the available commands
+
+### /timesheet
+will subscribe you to super awesome utility that each day at 20:22 asks how many
+hours did you work, and save them for later processing on agileadmin
 
 ***
 ## :wrench: Configuration
