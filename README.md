@@ -8,7 +8,7 @@
   <br>
 </h1>
 
-| This bot is intended for helping automating small tecious task of the dyne overall interaction |
+| This bot is intended for helping automating small tedious task of the dyne overall interaction |
 :---:
 | [![Dyne.org](https://img.shields.io/badge/%3C%2F%3E%20with%20%E2%9D%A4%20by-Dyne.org-blue.svg)](https://dyne.org) |
 
