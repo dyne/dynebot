@@ -30,7 +30,7 @@ def save(hours, user, date=datetime.date.today()):
 
 def hours_button(bot, update):
     query = update.callback_query
-    save(str(datetime.date.today()), {'hours': query.data, 'user': update.effective_user.username})
+    save(hours=query.data, user=update.effective_user.username)
     text = emojize(":tada: COOL! *Thank you for your hard work!* Your %sh are safely recorded" % query.data,
                    use_aliases=True)
     bot.edit_message_text(text=text, chat_id=query.message.chat_id,
@@ -49,8 +49,6 @@ def ask_for_hours(bot, job):
 
 def timesheet(bot, update, job_queue):
     time = datetime.time(hour=env.int("HOUR"), minute=env.int("MINUTE"))
-    # job_queue.stop()
-
     job_queue.run_daily(ask_for_hours,
                         time,
                         days=(0, 1, 2, 3, 4, 5),
@@ -58,7 +56,9 @@ def timesheet(bot, update, job_queue):
 
 
 def recap_handler(bot, update):
-    result = Entry.recap('puria', 6)
+    month = update.message.text.split()[1:2]
+    month = int(month[0]) if len(month) else datetime.date.today().month
+    result = Entry.recap(update.effective_user.username, int(month))
     update.message.reply_text(str(result))
 
 
