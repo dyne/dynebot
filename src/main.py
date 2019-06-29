@@ -2,28 +2,30 @@ import datetime
 import logging
 
 from emoji import emojize
-from redis import Redis
+from sqlalchemy.exc import IntegrityError
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
-from config import BaseConfig
+from environs import Env
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+from src.model import DBSession, Base, engine
+from src.model.entry import Entry
+
+env = Env()
+env.read_env()
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
-config = BaseConfig()
+Base.metadata.create_all(bind=engine)
 
 
-def get_db():
-    host = config.get('REDIS_HOST')
-    port = config.get('REDIS_PORT')
-    db = config.get('REDIS_DB')
-    return Redis(host=host, port=port, db=db)
-
-
-def save(k, v):
-    r = get_db()
-    return r.hmset(k, v)
+def save(hours, user, date=datetime.date.today()):
+    e = Entry(hours=hours, user=user, date=date)
+    try:
+        DBSession.add(e)
+        DBSession.commit()
+    except IntegrityError:
+        DBSession.rollback()
 
 
 def hours_button(bot, update):
@@ -38,7 +40,7 @@ def hours_button(bot, update):
 def ask_for_hours(bot, job):
     update = job.context
     columns = 4
-    button_list = [InlineKeyboardButton("%sh" % __, callback_data=__) for __ in range(1, 13)]
+    button_list = [InlineKeyboardButton("%sh" % __, callback_data=__) for __ in range(0, 12)]
     menu = [button_list[i:i + columns] for i in range(0, len(button_list), columns)]
     reply_markup = InlineKeyboardMarkup(menu)
     text = emojize("How many hours :clock10: did you work today?", use_aliases=True)
@@ -46,11 +48,23 @@ def ask_for_hours(bot, job):
 
 
 def timesheet(bot, update, job_queue):
-    job_queue.run_daily(ask_for_hours, datetime.time(hour=config.getint("HOUR"), minute=config.getint("MINUTE")), days=(0, 1, 2, 3, 4, 5), context=update)
+    time = datetime.time(hour=env.int("HOUR"), minute=env.int("MINUTE"))
+    # job_queue.stop()
+
+    job_queue.run_daily(ask_for_hours,
+                        time,
+                        days=(0, 1, 2, 3, 4, 5),
+                        context=update)
 
 
-def help_handler(update, context):
-    update.message.reply_text('To start inserting your hours everyday, run */timesheet*', parse_mode=ParseMode.MARKDOWN)
+def recap_handler(bot, update):
+    result = Entry.recap('puria', 6)
+    update.message.reply_text(str(result))
+
+
+def help_handler(bot, update):
+    update.message.reply_text("""To start inserting your hours everyday, run */timesheet*.
+    To see the recap run */recap*""", parse_mode=ParseMode.MARKDOWN)
 
 
 def error(update, context):
@@ -58,10 +72,11 @@ def error(update, context):
 
 
 def main():
-    updater = Updater(config.get('TOKEN'))
+    updater = Updater(env('TOKEN'))
     updater.dispatcher.add_handler(CommandHandler('timesheet', timesheet, pass_job_queue=True))
     updater.dispatcher.add_handler(CallbackQueryHandler(hours_button))
     updater.dispatcher.add_handler(CommandHandler("help", help_handler))
+    updater.dispatcher.add_handler(CommandHandler("recap", recap_handler))
     updater.dispatcher.add_error_handler(error)
     updater.start_polling()
     updater.idle()
