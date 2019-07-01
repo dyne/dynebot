@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 Base.metadata.create_all(bind=engine)
 
 
-def save(hours, user, date=datetime.date.today()):
+def save(hours, user, date):
     e = Entry(hours=hours, user=user, date=date)
     try:
         DBSession.add(e)
@@ -30,7 +30,7 @@ def save(hours, user, date=datetime.date.today()):
 
 def hours_button(bot, update):
     query = update.callback_query
-    save(hours=query.data, user=update.effective_user.username)
+    save(hours=query.data, user=update.effective_user.username, date=datetime.date.today())
     text = emojize(":tada: COOL! *Thank you for your hard work!* Your %sh are safely recorded" % query.data,
                    use_aliases=True)
     bot.edit_message_text(text=text, chat_id=query.message.chat_id,
