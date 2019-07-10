@@ -19,8 +19,8 @@ log = logging.getLogger(__name__)
 Base.metadata.create_all(bind=engine)
 
 
-def save(hours, user, date=datetime.date.today()):
-    e = Entry(hours=hours, user=user, date=date)
+def save(hours, user):
+    e = Entry(hours=hours, user=user)
     try:
         DBSession.add(e)
         DBSession.commit()
