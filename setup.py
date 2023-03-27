@@ -8,7 +8,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "emoji==0.5.1",
-        "redis==3.2.0",
+        "redis==4.5.3",
         "inflect==2.1.0",
         "environs==4.2.0",
         "SQLAlchemy==1.3.5",
